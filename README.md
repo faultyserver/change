@@ -1,4 +1,4 @@
-# changeset
+# change
 
 An early, in-progress of Changesets in Crystal. Inspired by Elixir's [Ecto Changesets](https://hexdocs.pm/ecto/Ecto.Changeset.html).
 
@@ -15,7 +15,7 @@ Initial goals for this implementation include:
    ```yaml
    dependencies:
      changeset:
-       github: faultyserver/changeset
+       github: faultyserver/change
    ```
 
 2. Run `shards install`
