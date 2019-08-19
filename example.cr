@@ -1,23 +1,30 @@
 require "./src/change"
 
 class User
-  property name : String?
-  property age : Int32?
+  Change::Changeset.schema User,
+    name : String,
+    age : Int32
 
-  struct UserChanges
-    property name : String? = nil
-    property age : Int32? = nil
-  end
+  include Change::Changeset
 
-  def self.changeset(instance)
-    Change::Changeset(User, UserChanges).new(instance)
-      .cast({"name" => "Jon", "age" => nil}, ["name", "age"])
+  # Standard pattern for working with changesets. Define a static method
+  # that performs casts and validations to abstract that from the callsite.
+  def self.changeset(instance, changes)
+    Changeset.new(instance)
+      .cast(changes, [:name, :age])
   end
 end
 
+# Both changes are valid and stored on the changeset
+changeset = User.changeset(User.new, {name: "Jon", age: 23})
+pp changeset #=> @valid = true
+# Bool can't be casted to Int32, so the change is invalid and not stored,
+# and the changeset is marked as invalid.
+changeset = changeset.cast({age: true}, [:age])
+pp changeset #=> @valid = false
+
 
 user = User.new
-user.name = "Sam"
-user.age = 28
-
-pp User.changeset(user)
+pp user #=> Empty user
+changeset.apply(user)
+pp user #=> User with casted changes

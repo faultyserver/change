@@ -1,2 +1,8 @@
 require "spec"
-require "../src/changeset"
+require "../src/change"
+
+class User
+  Change::Changeset.schema User,
+    name : String,
+    age : Int32
+end

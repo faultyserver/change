@@ -1,0 +1,14 @@
+# See https://github.com/samueleaton/sentry/blob/master/.sentry.example.yml
+# for more information about configuration options.
+
+# By default, this file configures sentry to run specs whenever a relevant
+# source file changes.
+display_name: changeset specs
+info: true
+# `|| echo` makes sure that sentry keeps running even if there the specs fail.
+build: crystal spec || echo ''
+run: # nothing to do
+watch:
+  - .src/change.cr
+  - ./src/change/**/*.cr
+  - ./spec/**/*.cr

@@ -1,9 +1,6 @@
 require "./spec_helper"
 
-describe Changeset do
-  # TODO: Write tests
-
-  it "works" do
-    false.should eq(true)
+describe Change::Changeset do
+  describe "cast_field" do
   end
 end
