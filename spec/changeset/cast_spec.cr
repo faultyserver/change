@@ -46,6 +46,15 @@ describe Change::Changeset do
       changeset.age.should eq(35)
     end
 
+    it "does not assign changes that are not permitted" do
+      changeset = User.changeset()
+        .cast({name: "John", age: 35}, [:name])
+
+      changeset.name.should eq("John")
+      changeset.age?.should eq(nil)
+      changeset.age_changed?.should eq(false)
+    end
+
     it "allows casts to nil" do
       changeset = User.changeset()
         .cast({name: nil}, [:name])
