@@ -22,6 +22,55 @@ module Change
         property? {{prop.var}}_changed : Bool = false
       {% end %}
 
+      def changed? : Bool
+        {% for prop in prop_names %}
+          return true if self.{{prop}}_changed?
+        {% end %}
+
+        return false
+      end
+
+      def get_change(field : String, default=nil)
+        case field
+          {% for prop in prop_names %}
+            when "{{prop}}"
+              return self.{{prop}}? if self.{{prop}}_changed?
+              return default
+          {% end %}
+        end
+      end
+
+      def get_field(field : String, default=nil)
+        case field
+          {% for prop in prop_names %}
+            when "{{prop}}"
+              return self.{{prop}}? if self.{{prop}}_changed?
+              existing = @instance.{{prop}}?
+              return existing.nil? ? default : existing
+          {% end %}
+        end
+      end
+
+      def apply_changes
+        {% for prop in prop_names %}
+          if self.{{prop}}_changed?
+            @instance.{{prop}} = self.{{prop}}?
+          end
+        {% end %}
+
+        @instance
+      end
+
+      def apply_changes(inst : {{type}})
+        {% for prop in prop_names %}
+          if self.{{prop}}_changed?
+            inst.{{prop}} = self.{{prop}}?
+          end
+        {% end %}
+
+        inst
+      end
+
       private def cast_field(field : String, value)
         case field
         {% for prop in properties %}
@@ -45,34 +94,6 @@ module Change
             end
         {% end %}
         end
-      end
-
-      def changed? : Bool
-        {% for prop in prop_names %}
-          return true if self.{{prop}}_changed?
-        {% end %}
-
-        return false
-      end
-
-      def apply_changes
-        {% for prop in prop_names %}
-          if self.{{prop}}_changed?
-            @instance.{{prop}} = self.{{prop}}?
-          end
-        {% end %}
-
-        @instance
-      end
-
-      def apply_changes(inst : {{type}})
-        {% for prop in prop_names %}
-          if self.{{prop}}_changed?
-            inst.{{prop}} = self.{{prop}}?
-          end
-        {% end %}
-
-        inst
       end
     end
   end
