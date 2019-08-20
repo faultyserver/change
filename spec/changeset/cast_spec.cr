@@ -83,5 +83,14 @@ describe Change::Changeset do
       changeset.age.should eq(35)
       changeset.age_changed?.should eq(true)
     end
+
+    it "ignores non-existent fields" do
+      user = User.new(name: "John", age: 24)
+
+      changeset = User.changeset(user)
+        .cast({name: "John", age: 35}, [:non_existent])
+
+      changeset.changed?.should eq(false)
+    end
   end
 end

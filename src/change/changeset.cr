@@ -1,5 +1,3 @@
-require "./changeset_error"
-
 module Change
   abstract struct Changeset(T)
     property instance : T
@@ -21,7 +19,7 @@ module Change
     def cast(props, permitted : Array) : self
       permitted.each do |field|
         field_name = field.to_s
-        next unless props.has_key?(field_name)
+        next unless has_field?(field_name) && props.has_key?(field_name)
         cast_field(field_name, props[field_name])
       end
 
@@ -30,6 +28,9 @@ module Change
 
     # Returns true if any field in this changeset has been marked as changed.
     abstract def changed? : Bool
+
+    # Returns true if `field` is a valid field name in this changeset.
+    abstract def has_field?(field : String) : Bool
 
     # Return the stored change for the given `field` from this changeset, or
     # `default` if the field has not been changed.

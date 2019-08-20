@@ -22,12 +22,18 @@ module Change
         property? {{prop.var}}_changed : Bool = false
       {% end %}
 
+      FIELD_NAMES = {{ prop_names.map(&.stringify) }}
+
       def changed? : Bool
         {% for prop in prop_names %}
           return true if self.{{prop}}_changed?
         {% end %}
 
         return false
+      end
+
+      def has_field?(field : String)
+        FIELD_NAMES.includes?(field)
       end
 
       def get_change(field : String, default=nil)
