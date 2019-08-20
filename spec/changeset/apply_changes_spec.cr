@@ -13,7 +13,7 @@ private class User
 end
 
 describe Change::Changeset do
-  describe "#apply/0" do
+  describe "#apply_changes/0" do
     it "applies all saved changes to the Changeset's stored instance" do
       # No arg creates an empty instance.
       changeset = User.changeset()
@@ -23,7 +23,7 @@ describe Change::Changeset do
       user.name?.should eq(nil)
       user.age?.should eq(nil)
 
-      changeset.apply
+      changeset.apply_changes
       user.name.should eq("John")
       user.age.should eq(35)
     end
@@ -32,7 +32,7 @@ describe Change::Changeset do
       changeset = User.changeset()
         .cast({name: "John", age: 35}, [:name, :age])
 
-      changeset.apply
+      changeset.apply_changes
       changeset.name.should eq("John")
       changeset.name_changed?.should eq(true)
       changeset.age.should eq(35)
@@ -40,14 +40,14 @@ describe Change::Changeset do
     end
   end
 
-  describe "#apply/1" do
+  describe "#apply_changes/1" do
     it "applies all saved changes to the given instance" do
       # No arg creates an empty instance.
       changeset = User.changeset()
         .cast({name: "John", age: 35}, [:name, :age])
 
       user = User.new
-      changeset.apply(user)
+      changeset.apply_changes(user)
       user.name.should eq("John")
       user.age.should eq(35)
     end
@@ -57,7 +57,7 @@ describe Change::Changeset do
         .cast({name: "John", age: 35}, [:name, :age])
 
       user = User.new
-      changeset.apply(user)
+      changeset.apply_changes(user)
       changeset.name.should eq("John")
       changeset.name_changed?.should eq(true)
       changeset.age.should eq(35)

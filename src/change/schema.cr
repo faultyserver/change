@@ -55,7 +55,7 @@ module Change
         return false
       end
 
-      def apply
+      def apply_changes
         {% for prop in prop_names %}
           if self.{{prop}}_changed?
             @instance.{{prop}} = self.{{prop}}?
@@ -65,7 +65,7 @@ module Change
         @instance
       end
 
-      def apply(inst : {{type}})
+      def apply_changes(inst : {{type}})
         {% for prop in prop_names %}
           if self.{{prop}}_changed?
             inst.{{prop}} = self.{{prop}}?

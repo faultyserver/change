@@ -33,9 +33,9 @@ module Change
     #
     # This is considered a safe operation, as only validated changes are
     # stored in the changeset.
-    abstract def apply : T
-    # Like `apply/0`, but instead applying the changes to the given instance.
-    abstract def apply(inst : T) : T
+    abstract def apply_changes : T
+    # Like `apply_changes/0`, but instead applying the changes to the given instance.
+    abstract def apply_changes(inst : T) : T
 
 
     # Cast `value` into the field with the given name.
