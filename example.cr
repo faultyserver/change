@@ -52,3 +52,16 @@ user = User.new
 pp user #=> Empty user
 changeset.apply_changes(user)
 pp user #=> User with casted changes
+
+
+## Casting JSON
+
+require "json"
+# `cast` accepts any key-value enumerable type with String keys that supports
+# `[]` and `has_key?`. JSON _almost_ fits this, but doesn't support `has_key?`,
+# so it needs to be converted to a hash before sending to `cast`. Other than
+# that, passing a `JSON::Any` to a changeset function should just work.
+json_params = JSON.parse(%({"name": "Sam", "age": 35}))
+pp json_params.as_h
+user = User.changeset(User.new, json_params.as_h).apply_changes
+pp user

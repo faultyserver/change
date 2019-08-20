@@ -6,8 +6,15 @@ module Change
       end
     end
 
+    # Define a fallback cast method for all casts to a given type. This is
+    # mainly intended for primitive values and anything else that defines a
+    # converter on `Object` or things like `JSON` that cover most types
+    # automatically.
+    #
+    # The `value` parameter is left untyped to allow overrides for specific
+    # value types to be defined afterward.
     macro method_cast(kind, method)
-      def_cast(_, {{kind}}) do
+      def self.cast(value, target : {{kind.id}}.class) : {Bool, {{kind.id}}?}
         if value.responds_to?({{method}})
           {true, value.{{method.id}}}
         else
@@ -16,7 +23,6 @@ module Change
       # e.g. `"hello".to_i` raises an ArgumentError
       rescue ArgumentError
         {false, nil}
-      #
       rescue OverflowError
         {false, nil}
       end
