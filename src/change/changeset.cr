@@ -17,7 +17,7 @@ module Change::Changeset
     {% end %}
 
     struct Changeset
-      property instance : {{type}}?
+      property instance : {{type}}
       property? valid : Bool = true
 
       {% for prop in properties %}
@@ -25,7 +25,7 @@ module Change::Changeset
         property? {{prop.var}}_changed : Bool = false
       {% end %}
 
-      def initialize(@instance : {{type}}? = nil)
+      def initialize(@instance : {{type}})
       end
 
       # For each field in `permitted`, attempt to cast the value from `props`
@@ -62,13 +62,16 @@ module Change::Changeset
                 Change::TypeCast.cast(value, {{prop.type}})
               end
 
+            existing = @instance.{{prop.var}}?
+
+            return if existing == value
+
             if valid
               self.{{prop.var}} = value
               self.{{prop.var}}_changed = true
             else
               self.valid = false
             end
-            return valid
         {% end %}
         end
       end

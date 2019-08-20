@@ -1,6 +1,8 @@
 require "../spec_helper"
 
 private class User
+  include AutoInitialize
+
   Change::Changeset.schema User,
     name : String,
     age : Int32
@@ -58,6 +60,18 @@ describe Change::Changeset do
         .cast({name: "John", age: 35}, [:name, :age])
 
       changeset.name_changed?.should eq(true)
+      changeset.age_changed?.should eq(true)
+    end
+
+    it "does not cast unchanged fields" do
+      user = User.new(name: "John", age: 24)
+
+      changeset = User.changeset(user)
+        .cast({name: "John", age: 35}, [:name, :age])
+
+      changeset.name?.should eq(nil)
+      changeset.name_changed?.should eq(false)
+      changeset.age.should eq(35)
       changeset.age_changed?.should eq(true)
     end
   end
