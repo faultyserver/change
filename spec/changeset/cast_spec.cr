@@ -3,7 +3,7 @@ require "../spec_helper"
 private class User
   include AutoInitialize
 
-  Change::Changeset.schema User,
+  Change.schema User,
     name : String,
     age : Int32
 
