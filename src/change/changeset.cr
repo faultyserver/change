@@ -33,6 +33,8 @@ module Change::Changeset
       #
       # If any field cannot be casted successfully, the changeset is marked as
       # invalid, but all remaining casts will still be attempted.
+      #
+      # `nil` is always permitted in casts.
       def cast(props, permitted : Array) : self
         permitted.each do |field|
           field_name = field.to_s
@@ -49,11 +51,17 @@ module Change::Changeset
       # changeset, and the `changed?` field for that value will be set.
       # Otherwise, the changeset is marked as invalid and the value is not
       # assigned.
-      def cast_field(field : String, value)
+      private def cast_field(field : String, value)
         case field
         {% for prop in properties %}
           when "{{prop.var}}"
-            valid, value = Change::TypeCast.cast(value, {{prop.type}})
+            valid, value =
+              if value.nil?
+                {true, nil}
+              else
+                Change::TypeCast.cast(value, {{prop.type}})
+              end
+
             if valid
               self.{{prop.var}} = value
               self.{{prop.var}}_changed = true

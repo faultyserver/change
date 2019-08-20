@@ -1,11 +1,5 @@
 module Change
   module TypeCast
-    # Self-casts are always valid. The return type is `T?` to keep consistency
-    # with all other casts.
-    def self.cast(value : T, target : T.class) : {Bool, T?} forall T
-      {true, value}
-    end
-
     macro def_cast(given, target)
       def self.cast(value : {{given.id}}, target : {{target.id}}.class) : {Bool, {{target.id}}?}
         {{yield}}
@@ -31,6 +25,10 @@ module Change
     # Nil is always a successful cast to deal with field nilability. This is a
     # method overload that allows all other casts to ignore nilability.
     def_cast(_, Nil) do {true, nil} end
+    def self.cast(value : Nil, target : T.class) : {Bool, T?} forall T
+      {true, nil}
+    end
+
     # Boolean casts are always successful, even considering `nil` as a value.
     def_cast(_, Bool) do {true, !!value} end
 
