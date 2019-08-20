@@ -1,5 +1,11 @@
 module Change
   module TypeCast
+    # Self-casts are always valid. The return type is `T?` to keep consistency
+    # with all other casts.
+    def self.cast(value : T, target : T.class) : {Bool, T?} forall T
+      {true, value}
+    end
+
     macro def_cast(given, target)
       def self.cast(value : {{given.id}}, target : {{target.id}}.class) : {Bool, {{target.id}}?}
         {{yield}}
