@@ -5,7 +5,7 @@ private def test_valid_cast(value, type, expected_value, *, line=__LINE__, file=
   it("casts `#{value.inspect}` to #{type} as #{expected_value}", line: line, file: file, end_line: end_line) do
     valid, casted = Change::TypeCast.cast(value, type)
     valid.should eq(true)
-    casted.class.should eq(type)
+    casted.class.should eq(type) unless expected_value.nil?
     casted.should eq(expected_value)
   end
 end
@@ -29,8 +29,15 @@ end
 
 describe Change::TypeCast do
   describe "casts from JSON" do
-    # Everything can be casted to Nil
+    # Everything can be casted from Nil, but not to it
     test_valid_cast(JSON::Any.new(nil),   Nil, nil)
+    test_valid_cast(JSON::Any.new(nil),   Bool, nil)
+    test_valid_cast(JSON::Any.new(nil),   String, nil)
+    test_valid_cast(JSON::Any.new(nil),   Int32, nil)
+    test_valid_cast(JSON::Any.new(nil),   Int64, nil)
+    test_valid_cast(JSON::Any.new(nil),   Float32, nil)
+    test_valid_cast(JSON::Any.new(nil),   Float64, nil)
+
     test_invalid_cast(JSON::Any.new(true),      Nil)
     test_invalid_cast(JSON::Any.new(false),     Nil)
     test_invalid_cast(JSON::Any.new("hello"),   Nil)
@@ -74,7 +81,5 @@ describe Change::TypeCast do
     test_valid_cast_block(JSON::Any.new("infinity"),  Float32){ |v| !v.nil? && !!v.infinite? }
     test_invalid_cast(JSON::Any.new("invalid"),  Float64)
     test_invalid_cast(JSON::Any.new("invalid"),  Float32)
-
-    test_invalid_cast(JSON::Any.new(nil), String)
   end
 end

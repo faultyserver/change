@@ -32,7 +32,7 @@ module Change
         return false
       end
 
-      def has_field?(field : String)
+      def has_field?(field : String) : Bool
         FIELD_NAMES.includes?(field)
       end
 
@@ -57,7 +57,7 @@ module Change
         end
       end
 
-      def apply_changes
+      def apply_changes : {{type}}
         {% for prop in prop_names %}
           if self.{{prop}}_changed?
             @instance.{{prop}} = self.{{prop}}?
@@ -67,7 +67,7 @@ module Change
         @instance
       end
 
-      def apply_changes(inst : {{type}})
+      def apply_changes(inst : {{type}}) : {{type}}
         {% for prop in prop_names %}
           if self.{{prop}}_changed?
             inst.{{prop}} = self.{{prop}}?
@@ -77,20 +77,22 @@ module Change
         inst
       end
 
-      private def cast_field(field : String, value)
+      def changes_hash : Hash(String, String?)
+        hash = {} of String => String?
+        {% for prop in prop_names %}
+          if self.{{prop}}_changed?
+            hash["{{prop}}"] = self.{{prop}}?.try(&.to_s)
+          end
+        {% end %}
+        hash
+      end
+
+      protected def cast_field(field : String, value)
         case field
         {% for prop in properties %}
           when "{{prop.var}}"
-            valid, value =
-              if value.nil?
-                {true, nil}
-              else
-                Change::TypeCast.cast(value, {{prop.type}})
-              end
-
-            existing = @instance.{{prop.var}}?
-
-            return if existing == value
+            valid, value = Change::TypeCast.cast(value, {{prop.type}})
+            return if @instance.{{prop.var}}? == value
 
             if valid
               self.{{prop.var}} = value

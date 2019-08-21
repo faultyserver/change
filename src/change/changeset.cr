@@ -55,12 +55,22 @@ module Change
     # instance.
     abstract def apply_changes(inst : T) : T
 
+    # Returns a hash of changes currently stored in this changeset, including
+    # fields that have been changed to nil. Fields without changes are not
+    # included in this hash, meaning a changeset with no changes will return an
+    # empty hash.
+    #
+    # All non-nil field values are converted to Strings for simplicity. This is
+    # also useful for passing to external code as no matter the types of fields
+    # in the changeset, they will be Strings or Nil when coming from this hash.
+    abstract def changes_hash : Hash(String, String?)
+
     # Cast `value` into the field with the given name.
     #
     # If the cast is successful, the casted value will be assigned into the
     # changeset, and the `changed?` field for that value will be set.
     # Otherwise, the changeset is marked as invalid and the value is not
     # assigned.
-    private abstract def cast_field(field : String, value)
+    protected abstract def cast_field(field : String, value)
   end
 end

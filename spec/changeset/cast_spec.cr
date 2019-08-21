@@ -56,11 +56,13 @@ describe Change::Changeset do
     end
 
     it "allows casts to nil" do
-      changeset = User.changeset()
+      user = User.new(name: "John")
+      changeset = User.changeset(user)
         .cast({name: nil}, [:name])
 
       changeset.valid?.should eq(true)
       changeset.name?.should eq(nil)
+      changeset.name_changed?.should eq(true)
     end
 
 

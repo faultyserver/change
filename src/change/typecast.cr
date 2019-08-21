@@ -52,20 +52,13 @@ module Change
     end
 
     # Strings
-    # String has a special case for nil, as `nil.to_s` is defined, but should
-    # not be considered a valid cast (nilability is handled elsewhere above).
-    def_cast(Nil, String) do {false, nil} end
     method_cast(String, :to_s)
 
     # Integers
-    def_cast(Nil, Int32) do {false, nil} end
-    def_cast(Nil, Int64) do {false, nil} end
     method_cast(Int32,  :to_i32)
     method_cast(Int64,  :to_i64)
 
     # Floats
-    def_cast(Nil, Float32) do {false, nil} end
-    def_cast(Nil, Float64) do {false, nil} end
     method_cast(Float32,  :to_f32)
     method_cast(Float64,  :to_f64)
   end

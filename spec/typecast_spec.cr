@@ -4,7 +4,7 @@ private def test_valid_cast(value, type, expected_value, line=__LINE__, file=__F
   it("casts `#{value.inspect}` to #{type} as #{expected_value}", line: line, file: file, end_line: end_line) do
     valid, casted = Change::TypeCast.cast(value, type)
     valid.should eq(true)
-    casted.class.should eq(type)
+    casted.class.should eq(type) unless expected_value.nil?
     casted.should eq(expected_value)
   end
 end
@@ -41,6 +41,16 @@ describe Change::TypeCast do
   test_invalid_cast(23.0_f64,   Nil)
   test_invalid_cast(true,       Nil)
   test_invalid_cast(false,      Nil)
+
+  ## Casts from nil
+  test_valid_cast(nil,   Nil, nil)
+  test_valid_cast(nil,   Bool, nil)
+  test_valid_cast(nil,   String, nil)
+  test_valid_cast(nil,   Int32, nil)
+  test_valid_cast(nil,   Int64, nil)
+  test_valid_cast(nil,   Float32, nil)
+  test_valid_cast(nil,   Float64, nil)
+
 
   ## Casts to Bool
   test_valid_cast(false,      Bool, false)
