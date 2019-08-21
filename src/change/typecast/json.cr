@@ -32,26 +32,14 @@ module Change
     #     changeset(User.new, json_params.as_h).apply
     #     #=> #<User:... @name="John", @age=23, @admin=true
 
-    private macro json_cast(kind, method)
-      def_cast(JSON::Any, {{kind}}) do
-        {true, value.{{method.id}}}
-      # JSON::Any raises TypeCastErrors when a non-nilable cast fails
-      rescue TypeCastError
-        {false, nil}
-      end
-    end
-
-    json_cast(Nil, :as_nil?)
-    json_cast(Bool, :as_bool?)
-
-    json_cast(Int,    :as_i?)
-    json_cast(Int32,  :as_i?)
-    json_cast(Int64,  :as_i64?)
-
-    json_cast(Float,    :as_f?)
-    json_cast(Float32,  :as_f32?)
-    json_cast(Float64,  :as_f?)
-
-    json_cast(String, :as_s?)
+    def_cast(JSON::Any, Nil)      do cast(value.raw, Nil) end
+    def_cast(JSON::Any, Bool)     do cast(value.raw, Bool) end
+    def_cast(JSON::Any, Int)      do cast(value.raw, Int) end
+    def_cast(JSON::Any, Int32)    do cast(value.raw, Int32) end
+    def_cast(JSON::Any, Int64)    do cast(value.raw, Int64) end
+    def_cast(JSON::Any, Float)    do cast(value.raw, Float) end
+    def_cast(JSON::Any, Float32)  do cast(value.raw, Float32) end
+    def_cast(JSON::Any, Float64)  do cast(value.raw, Float64) end
+    def_cast(JSON::Any, String)   do cast(value.raw, String) end
   end
 end

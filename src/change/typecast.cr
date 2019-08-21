@@ -28,18 +28,27 @@ module Change
       end
     end
 
-    # Nil is always a successful cast to deal with field nilability. This is a
-    # method overload that allows all other casts to ignore nilability.
-    def_cast(_, Nil) do {true, nil} end
+    # Nil
+    def_cast(Nil, Nil) do {true, nil} end
+    # Some other types have their own representations of nil (such as
+    # `JSON::Any`), so `value` is left untyped here.
+    def self.cast(value, target : Nil.class) : {Bool, Nil}
+      {false, nil}
+    end
+    # Casting _from_ nil is always considered valid to deal with field
+    # nilability. Non-nil assertions are instead made using validations.
     def self.cast(value : Nil, target : T.class) : {Bool, T?} forall T
       {true, nil}
     end
 
-    # Boolean casts are always successful, even considering `nil` as a value.
-    # This is done without typing `value` so that other code can override this
-    # cast later (e.g., JSON::Any -> Bool)
+    # Booleans
+    # Boolean casts allow the strings "false" and "true" as their respective
+    # boolean values, but nothing else.
     def self.cast(value, target : Bool.class)
-      {true, !!value}
+      return {true, true} if value == "true"
+      return {true, false} if value == "false"
+      return {true, value} if value.is_a?(Bool)
+      return {false, nil}
     end
 
     # Strings
@@ -49,18 +58,14 @@ module Change
     method_cast(String, :to_s)
 
     # Integers
-    def_cast(Nil, Int) do {false, nil} end
     def_cast(Nil, Int32) do {false, nil} end
     def_cast(Nil, Int64) do {false, nil} end
-    method_cast(Int,    :to_i)
     method_cast(Int32,  :to_i32)
     method_cast(Int64,  :to_i64)
 
     # Floats
-    def_cast(Nil, Float) do {false, nil} end
     def_cast(Nil, Float32) do {false, nil} end
     def_cast(Nil, Float64) do {false, nil} end
-    method_cast(Float,    :to_f)
     method_cast(Float32,  :to_f32)
     method_cast(Float64,  :to_f64)
   end
