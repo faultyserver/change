@@ -1,6 +1,6 @@
 require "./spec_helper"
 
-def test_valid_cast(value, type, expected_value, line=__LINE__, file=__FILE__, end_line=__END_LINE__)
+private def test_valid_cast(value, type, expected_value, line=__LINE__, file=__FILE__, end_line=__END_LINE__)
   it("casts `#{value.inspect}` to #{type} as #{expected_value}", line: line, file: file, end_line: end_line) do
     valid, casted = Change::TypeCast.cast(value, type)
     valid.should eq(true)
@@ -9,7 +9,7 @@ def test_valid_cast(value, type, expected_value, line=__LINE__, file=__FILE__, e
   end
 end
 
-def test_invalid_cast(value, type, line=__LINE__, file=__FILE__, end_line=__END_LINE__)
+private def test_invalid_cast(value, type, line=__LINE__, file=__FILE__, end_line=__END_LINE__)
   it("fails to cast `#{value.inspect}` to #{type}", line: line, file: file, end_line: end_line) do
     valid, casted = Change::TypeCast.cast(value, type)
     valid.should eq(false)

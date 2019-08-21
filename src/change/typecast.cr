@@ -36,7 +36,11 @@ module Change
     end
 
     # Boolean casts are always successful, even considering `nil` as a value.
-    def_cast(_, Bool) do {true, !!value} end
+    # This is done without typing `value` so that other code can override this
+    # cast later (e.g., JSON::Any -> Bool)
+    def self.cast(value, target : Bool.class)
+      {true, !!value}
+    end
 
     # Strings
     # String has a special case for nil, as `nil.to_s` is defined, but should

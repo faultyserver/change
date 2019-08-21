@@ -49,8 +49,8 @@ module Change
     json_cast(Int64,  :as_i64?)
 
     json_cast(Float,    :as_f?)
-    json_cast(Float32,  :as_f?)
-    json_cast(Float64,  :as_f64?)
+    json_cast(Float32,  :as_f32?)
+    json_cast(Float64,  :as_f?)
 
     json_cast(String, :as_s?)
   end
