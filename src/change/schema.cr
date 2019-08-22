@@ -1,4 +1,26 @@
 module Change
+  macro included
+    struct Changeset < ::Change::Changeset({{@type}})
+      FIELDS = [] of NamedTuple(name: String, type: String)
+    end
+
+    macro finished
+      gen_schema(\{{@type}})
+    end
+  end
+
+
+  macro field(prop, **opts)
+    {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
+    property! {{prop}}?
+  end
+
+  macro field!(prop, **opts)
+    {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
+    property {{prop}}
+  end
+
+
   # Generate a custom Changeset struct for the given type. `properties` will
   # also be generated as properties on the type itself.
   # `properties` should not include any nilable types, as they will be added
@@ -8,18 +30,14 @@ module Change
   #
   # Rather than enforcing nilability on the field type itself, it is instead
   # managed by the Changeset's casting, validations, and other constraints.
-  macro schema(type, *properties)
-    {% prop_names = properties.map(&.var) %}
-    {% prop_types = properties.map(&.type) %}
-
-    {% for prop in properties %}
-      property! {{prop}}?
-    {% end %}
+  macro gen_schema(type)
+    {% prop_names = Changeset::FIELDS.map(&.[:name]) %}
+    {% prop_types = Changeset::FIELDS.map(&.[:type]) %}
 
     struct Changeset < ::Change::Changeset({{type}})
-      {% for prop in properties %}
-        property! {{prop.var}} : {{prop.type}}?
-        property? {{prop.var}}_changed : Bool = false
+      {% for prop in Changeset::FIELDS %}
+        property! {{prop[:name].id}} : {{prop[:type].id}}?
+        property? {{prop[:name].id}}_changed : Bool = false
       {% end %}
 
       FIELD_NAMES = {{ prop_names.map(&.stringify) }}
@@ -89,14 +107,14 @@ module Change
 
       protected def cast_field(field : String, value)
         case field
-        {% for prop in properties %}
-          when "{{prop.var}}"
-            valid, value = Change::TypeCast.cast(value, {{prop.type}})
-            return if @instance.{{prop.var}}? == value
+        {% for prop in Changeset::FIELDS %}
+          when "{{prop[:name].id}}"
+            valid, value = Change::TypeCast.cast(value, {{prop[:type].id}})
+            return if @instance.{{prop[:name].id}}? == value
 
             if valid
-              self.{{prop.var}} = value
-              self.{{prop.var}}_changed = true
+              self.{{prop[:name].id}} = value
+              self.{{prop[:name].id}}_changed = true
             else
               self.valid = false
             end

@@ -1,11 +1,11 @@
 require "./src/change"
 
 class User
-  Change.schema(User,
-    name : String,
-    age : Int32,
-    bio : String
-  )
+  include Change
+
+  field name : String
+  field age : Int32
+  field bio : String
 
   # Standard pattern for working with changesets. Define a static method
   # that performs casts and validations to abstract that from the callsite.

@@ -1,16 +1,5 @@
 require "../spec_helper"
 
-private class User
-  include AutoInitialize
-
-  Change.schema User,
-    name : String,
-    age : Int32
-
-  def self.changeset(instance=self.new)
-    User::Changeset.new(instance)
-  end
-end
 
 describe Change::Changeset do
   describe "#apply_changes/0" do
