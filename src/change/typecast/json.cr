@@ -3,11 +3,8 @@
 #
 # The `def_cast` macro is a convenience for defining a simple cast from A to B,
 # and should be the only way casts are defined. Directly creating a `self.cast`
-# method is not an officially supported way of adding casts, as there may be
-# other behavior added/hooked by the macro.
-#
-# This implementation creates another wrapping macro, `json_cast` to simplify
-# the definitions even further.
+# method is not recommended, as there may be other behavior added/hooked by the
+# `def_cast` macro.
 require "json"
 
 module Change
