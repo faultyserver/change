@@ -5,16 +5,28 @@ module Change
     end
 
     macro finished
-      gen_schema(\{{@type}})
+      gen_changeset(\{{@type}})
     end
   end
 
 
+  # Define a nilable property on the caller and for the Changeset it generates.
+  # The generated property will automatically be made Nilable, but the default
+  # accessor will raise on nil. If the field is expected to be nil, use `prop?`
+  # to access the field instead.
+  #
+  # `prop` is expected to be a `TypeDeclaration` (e.g. `name : String`), just
+  # as is used when calling `property`, including setting a default value, or
+  # adding any annotations.
+  #
+  # `opts` is currently unused, but will be passed along to the generated
+  # changeset fields to modify them further.
   macro field(prop, **opts)
     {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
     property! {{prop}}?
   end
 
+  # Exactly like `field`, but the generated field is non-nilable.
   macro field!(prop, **opts)
     {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
     property {{prop}}
@@ -30,7 +42,7 @@ module Change
   #
   # Rather than enforcing nilability on the field type itself, it is instead
   # managed by the Changeset's casting, validations, and other constraints.
-  macro gen_schema(type)
+  macro gen_changeset(type)
     {% prop_names = Changeset::FIELDS.map(&.[:name]) %}
     {% prop_types = Changeset::FIELDS.map(&.[:type]) %}
 
