@@ -8,9 +8,10 @@ module Change
     # marked as invalid.
     #
     # If the field is not a valid field for this changeset, it is ignored.
-    def validate_required(field : String) : self
-      if has_field?(field) && get_field(field).nil?
-        add_error(field, "is required")
+    def validate_required(field : String | Symbol) : self
+      field_name = field.to_s
+      if has_field?(field_name) && get_field(field_name).nil?
+        add_error(field_name, "is required")
       end
 
       self
@@ -18,7 +19,7 @@ module Change
 
     # Validate the multiple fields are present in the Changeset. See
     # `validate_required(String)` for more information.
-    def validate_required(fields : Array(String)) : self
+    def validate_required(fields : Array(String) | Array(Symbol)) : self
       fields.each{ |field| validate_required(field) }
       self
     end

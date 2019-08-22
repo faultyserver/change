@@ -67,5 +67,25 @@ describe Change::Changeset do
       changeset.errors.size.should eq(0)
       changeset.valid?.should eq(true)
     end
+
+    it "accepts a single field name as a Symbol" do
+      # No arg creates an empty instance.
+      changeset = User.changeset()
+        .cast({age: 35}, [:name, :age])
+        .validate_required(:name)
+
+      changeset.errors.size.should eq(1)
+      changeset.valid?.should eq(false)
+    end
+
+    it "accepts multiple field names as Symbols" do
+      # No arg creates an empty instance.
+      changeset = User.changeset()
+        .cast({name: "John"}, [:name])
+        .validate_required([:name, :age])
+
+      changeset.errors.size.should eq(1)
+      changeset.valid?.should eq(false)
+    end
   end
 end

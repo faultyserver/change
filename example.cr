@@ -12,7 +12,7 @@ class User
   def self.changeset(instance, changes={} of String => String)
     Changeset.new(instance)
       .cast(changes, [:name, :age, :bio])
-      .validate_required(["name", "age"])
+      .validate_required([:name, :age])
   end
 end
 
