@@ -1,5 +1,9 @@
 module Change
-  abstract struct Changeset(T)
+  # `T` is the type of the stored instance, inferrable from `initialize`.
+  # `U` is a union of the type of all managed fields on that instance. `U` does
+  # not need to (and generally should not) include `Nil` in the union, it will
+  # automatically be added where needed.
+  abstract struct Changeset(T, U)
     property instance : T
     property? valid : Bool = true
     property errors : Array(ChangesetError)
@@ -37,12 +41,12 @@ module Change
     #
     # Even if the value of the change is `nil`, as long as the field has been
     # marked as changed, that value will be returned instead of `default`.
-    abstract def get_change(field : String, default=nil)
+    abstract def get_change(field : String, default=nil) : U?
 
     # Similar to `get_change` but if no change is present, this method first
     # checks the stored instance for a defined value, and only returns
     # `default` if the instance's existing value is `nil`.
-    abstract def get_field(field : String, default=nil)
+    abstract def get_field(field : String, default=nil) : U?
 
     # Assign each changed value from this changeset onto the instance owned
     # by this Changeset (in the `instance` property). Returns the updated
@@ -59,11 +63,23 @@ module Change
     # fields that have been changed to nil. Fields without changes are not
     # included in this hash, meaning a changeset with no changes will return an
     # empty hash.
-    #
-    # All non-nil field values are converted to Strings for simplicity. This is
-    # also useful for passing to external code as no matter the types of fields
-    # in the changeset, they will be Strings or Nil when coming from this hash.
     abstract def changes_hash : Hash(String, String?)
+
+    # Calls the given block once for every accepted change currently in the
+    # changeset. The block is passed the name of the changed field and its
+    # accepted value as arguments. Fields that have not been changed will not
+    # be yielded to the block.
+    #
+    # If the changeset has no accepted changes, the block will not be called.
+    abstract def each_change(&block : String, U? -> _)
+
+    # Calls the given block once for every field in the changeset, including
+    # fields that have not been changed. Fields with accepted changes will
+    # yield the changed value, while fields without changes will yield the
+    # value from the stored instance.
+    #
+    # The block will always be called for every field managed by the changeset.
+    abstract def each_field(&block : String, U? -> _)
 
     # Cast `value` into the field with the given name.
     #

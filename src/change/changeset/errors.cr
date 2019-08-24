@@ -7,7 +7,7 @@ module Change
     end
   end
 
-  abstract struct Changeset(T)
+  abstract struct Changeset(T, U)
     # Add an error to this changeset. `field` is the field that the error
     # applies to, and `message` is a description about the error. Errors will
     # be coerced into a `ChangesetError` object.

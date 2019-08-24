@@ -1,5 +1,5 @@
 module Change
-  abstract struct Changeset(T)
+  abstract struct Changeset(T, U)
     # Validates that the given field is present in this Changeset, either as a
     # change, or as an existing value on the stored instance. Presence is
     # defined as anything other than a value of `nil`.

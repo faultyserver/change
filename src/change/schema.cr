@@ -1,8 +1,6 @@
 module Change
   macro included
-    struct Changeset < ::Change::Changeset({{@type}})
-      FIELDS = [] of NamedTuple(name: String, type: String)
-    end
+    FIELDS = [] of NamedTuple(name: String, type: String)
 
     macro finished
       gen_changeset(\{{@type}})
@@ -22,13 +20,13 @@ module Change
   # `opts` is currently unused, but will be passed along to the generated
   # changeset fields to modify them further.
   macro field(prop, **opts)
-    {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
+    {% FIELDS.push({name: prop.var, type: prop.type}) %}
     property! {{prop}}?
   end
 
   # Exactly like `field`, but the generated field is non-nilable.
   macro field!(prop, **opts)
-    {% Changeset::FIELDS.push({name: prop.var, type: prop.type}) %}
+    {% FIELDS.push({name: prop.var, type: prop.type}) %}
     property {{prop}}
   end
 
@@ -43,11 +41,13 @@ module Change
   # Rather than enforcing nilability on the field type itself, it is instead
   # managed by the Changeset's casting, validations, and other constraints.
   macro gen_changeset(type)
-    {% prop_names = Changeset::FIELDS.map(&.[:name]) %}
-    {% prop_types = Changeset::FIELDS.map(&.[:type]) %}
+    {% prop_names = FIELDS.map(&.[:name]) %}
+    {% prop_types = FIELDS.map(&.[:type]) %}
 
-    struct Changeset < ::Change::Changeset({{type}})
-      {% for prop in Changeset::FIELDS %}
+    private alias Field_Type = Union({{*prop_types}})
+
+    struct Changeset < ::Change::Changeset({{type}}, Field_Type)
+      {% for prop in FIELDS %}
         property! {{prop[:name].id}} : {{prop[:type].id}}?
         property? {{prop[:name].id}}_changed : Bool = false
       {% end %}
@@ -117,9 +117,23 @@ module Change
         hash
       end
 
+      def each_change(&block : String, Field_Type? -> _)
+        {% for prop in prop_names %}
+          if self.{{prop}}_changed?
+            block.call({{prop.stringify}}, get_change({{prop.stringify}}))
+          end
+        {% end %}
+      end
+
+      def each_field(&block : String, Field_Type? -> _)
+        {% for prop in prop_names %}
+          block.call({{prop.stringify}}, get_field({{prop.stringify}}))
+        {% end %}
+      end
+
       protected def cast_field(field : String, value)
         case field
-        {% for prop in Changeset::FIELDS %}
+        {% for prop in FIELDS %}
           when "{{prop[:name].id}}"
             valid, value = Change::TypeCast.cast(value, {{prop[:type].id}})
             return if @instance.{{prop[:name].id}}? == value
