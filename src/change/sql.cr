@@ -11,6 +11,10 @@ module Change
     macro source(name)
       class_getter sql_source = "{{name.id}}"
     end
+
+    macro primary_key(name)
+      class_getter primary_key = "{{name.id}}"
+    end
   end
 
   module Repo
@@ -22,24 +26,30 @@ module Change
       queryable.from_rs(conn.query("SELECT #{select_string} FROM #{source}"))
     end
 
-    def self.insert(conn, changeset : Changeset(T, U)) forall T, U
-      return unless (changeset.valid?)
+    def self.insert(conn, changeset : Changeset(T, U)) : T | Changeset(T, U) forall T, U
+      return changeset unless (changeset.valid?)
 
       source = T.sql_source
 
       fields = [] of String
-      values = [] of String
+      values = [] of U?
       changeset.each_field do |field, value|
-        fields.push(field)
-        values.push(value.inspect)
+        unless field == T.primary_key
+          fields.push(field)
+          values.push(value)
+        end
       end
+
+      returns = fields + [T.primary_key]
+      positions = values.map_with_index{ |_, i| "$#{i+1}" }
 
       query = <<-SQL
         INSERT INTO #{source} (#{fields.join(", ")})
-        VALUES (#{values.join(", ")})
+        VALUES (#{positions.join(", ")})
+        RETURNING #{returns.join(", ")}
       SQL
 
-      query
+      conn.query_one(query, values, as: T)
     end
   end
 end
