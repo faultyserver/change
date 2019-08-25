@@ -12,3 +12,5 @@ development_dependencies:
   # Used to simplify instance initialization in tests
   auto_initialize:
     github: kostya/auto_initialize
+  pg:
+    github: will/crystal-pg
