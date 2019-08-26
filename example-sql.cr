@@ -1,12 +1,15 @@
 require "./src/change"
+require "./src/change/sql/postgres_repo"
 require "pg"
 
-class User
+struct User
   include Change
   include Change::SQL
 
   source :users
+  primary_key :id
 
+  field id : Int32
   field name : String
   field age : Int32
   field bio : String
@@ -27,10 +30,9 @@ class User
 end
 
 
-conn = DB.open("a database url")
-pp Change::Repo.all(conn, User)
+Repo = Change::SQL::PostgresRepo.new("db_url")
+pp Repo.all(User)
 
 
-changeset = User.changeset(User.new, {name: "John", age: 23})
-
-puts Change::Repo.insert(conn, changeset)
+# changeset = User.changeset(User.new, {name: "John", age: 23})
+# puts Repo.insert(conn)

@@ -16,40 +16,4 @@ module Change
       class_getter primary_key = "{{name.id}}"
     end
   end
-
-  module Repo
-    def self.all(conn, queryable : T.class) : Array(T) forall T
-      source = queryable.sql_source
-      columns = T::Changeset::FIELD_NAMES.map{ |field| "#{source}.#{field}" }
-      select_string = columns.join(", ")
-
-      queryable.from_rs(conn.query("SELECT #{select_string} FROM #{source}"))
-    end
-
-    def self.insert(conn, changeset : Changeset(T, U)) : T | Changeset(T, U) forall T, U
-      return changeset unless (changeset.valid?)
-
-      source = T.sql_source
-
-      fields = [] of String
-      values = [] of U?
-      changeset.each_field do |field, value|
-        unless field == T.primary_key
-          fields.push(field)
-          values.push(value)
-        end
-      end
-
-      returns = fields + [T.primary_key]
-      positions = values.map_with_index{ |_, i| "$#{i+1}" }
-
-      query = <<-SQL
-        INSERT INTO #{source} (#{fields.join(", ")})
-        VALUES (#{positions.join(", ")})
-        RETURNING #{returns.join(", ")}
-      SQL
-
-      conn.query_one(query, values, as: T)
-    end
-  end
 end
