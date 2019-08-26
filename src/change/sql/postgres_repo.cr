@@ -17,7 +17,7 @@ module Change
       # Impl
       ###
 
-      def all(queryable : T.class) : Array(T) forall T
+      def all(queryable : T.class, query : Query? = nil) : Array(T) forall T
         source = queryable.sql_source
         columns = T::Changeset::FIELD_NAMES.map{ |field| "#{source}.#{field}" }
         select_string = columns.join(", ")

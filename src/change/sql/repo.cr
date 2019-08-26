@@ -1,10 +1,12 @@
+require "./query"
+
 module Change
   module SQL
     # Generic interface for querying a repository.
     #
     # Adapters implement this interface by executing the designated operations
     abstract class Repo
-      abstract def all(queryable : T.class) : Array(T) forall T
+      abstract def all(queryable : T.class, query : Query? = nil) : Array(T) forall T
 
       abstract def one(queryable : T.class) : T forall T
 
