@@ -2,6 +2,7 @@ require "db"
 require "pg"
 
 require "./repo"
+require "./postgres_query"
 
 module Change
   module SQL
@@ -17,53 +18,77 @@ module Change
       # Impl
       ###
 
-      def all(queryable : T.class, query : Query? = nil) : Array(T) forall T
-        source = queryable.sql_source
-        columns = T::Changeset::FIELD_NAMES.map{ |field| "#{source}.#{field}" }
-        select_string = columns.join(", ")
+      def all(queryable : T.class, query : Query = Query.new) : Array(T) forall T
+        query = query
+          .only_select(T::Changeset::FIELD_NAMES)
+          .only_from(T.sql_source)
 
-        queryable.from_rs(conn.query("SELECT #{select_string} FROM #{source}"))
+        sql, binds = PostgresQuery.select(query)
+        queryable.from_rs(conn.query(sql, binds))
       end
 
-      def one(queryable : T) : T forall T
+      def one(queryable : T.class, query : Query = Query.new) : T forall T
+        query = query
+          .only_from(T.sql_source)
+          .limit(1)
+
+        sql, binds = PostgresQuery.select(query)
+        conn.query_one(sql, binds, as: T)
       end
 
-      def get(queryable : T, id) : T? forall T
+      def get(queryable : T.class, id) : T? forall T
+        query = Query.new
+          .where({T.primary_key => id})
+
+        self.one(queryable, query)
       end
 
 
       def insert(changeset : Changeset(T, U)) : T | Changeset(T, U) forall T, U
         return changeset unless (changeset.valid?)
 
-        source = T.sql_source
-
-        fields = [] of String
-        values = [] of U?
-        changeset.each_field do |field, value|
-          unless field == T.primary_key
-            fields.push(field)
-            values.push(value)
-          end
+        fields = {} of String => U?
+        changeset.each_change do |field, value|
+          fields[field] = value
         end
 
-        returns = fields + [T.primary_key]
-        positions = values.map_with_index{ |_, i| "$#{i+1}" }
+        query =
+          Query.new
+          .from(T.sql_source)
+          .update(fields)
 
-        query = <<-SQL
-          INSERT INTO #{source} (#{fields.join(", ")})
-          VALUES (#{positions.join(", ")})
-          RETURNING #{returns.join(", ")}
-        SQL
-
-        conn.query_one(query, values, as: T)
+        sql, binds = PostgresQuery.insert(query)
+        conn.query_one(sql, binds, as: T)
       end
 
 
       def update(changeset : Changeset(T, U)) forall T, U
+        return changeset unless (changeset.valid?)
+
+        fields = {} of String => U?
+        changeset.each_change do |field, value|
+          fields[field] = value
+        end
+
+        query =
+          Query.new
+          .from(T.sql_source)
+          .update(fields)
+          .where({T.primary_key => changeset.get_field(T.primary_key)})
+
+        sql, binds = PostgresQuery.update(query)
+        conn.exec(sql, binds)
       end
 
 
-      def delete(changeset : Changeset(T, U)) forall T, U
+      def delete(queryable : T.class, id) forall T
+        query =
+          Query.new
+          .from(T.sql_source)
+          .where({T.primary_key => id})
+
+        sql, binds = PostgresQuery.delete(query)
+        conn.exec(sql, binds)
       end
     end
   end

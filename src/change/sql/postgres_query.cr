@@ -4,7 +4,6 @@ module Change
       property query : Query
       property binds : Array(DB::Any)
 
-
       def self.select(query : Query)
         q = self.new(query)
         {q.to_select, q.binds}
@@ -45,6 +44,9 @@ module Change
             str << " ORDER BY "
             build_order_expressions(str)
           end
+
+          str << " LIMIT #{query.limit}" if query.limit?
+          str << " OFFSET #{query.offset}" if query.offset?
         end
       end
 
@@ -56,7 +58,8 @@ module Change
           build_insert_field_list_expression(str)
           str << ") VALUES ("
           build_insert_value_list_expression(str)
-          str << ")"
+          str << ") RETURNING "
+          build_select_expressions(str)
         end
       end
 
@@ -99,7 +102,6 @@ module Change
         end
 
         columns = query.selects.map(&->make_criterion(SelectExpr))
-
         io << columns.join(", ")
       end
 

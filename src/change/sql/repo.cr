@@ -16,7 +16,7 @@ module Change
 
       abstract def update(changeset : Changeset(T, U)) forall T, U
 
-      abstract def delete(changeset : Changeset(T, U)) forall T, U
+      abstract def delete(queryable : T.class, id) forall T
     end
   end
 end

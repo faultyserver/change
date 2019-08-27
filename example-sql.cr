@@ -32,19 +32,24 @@ end
 
 
 Repo = Change::SQL::PostgresRepo.new("db_url")
+Query = Change::SQL::Query
+
 pp Repo.all(User)
+pp Repo.get(User, 2)
+pp Repo.one(User, Query.new.offset(1))
+
+joe = User.changeset(User.new, {name: "Joe", age: 40})
+user = Repo.insert(joe)
+pp user
+
+if user.is_a?(User)
+  updated = User.changeset(user, {bio: "another"})
+  pp Repo.update(updated)
+
+  Repo.delete(User, updated.instance.id)
+end
 
 
 # changeset = User.changeset(User.new, {name: "John", age: 23})
 # puts Repo.insert(conn)
 
-Query = Change::SQL::Query
-
-q = Query.new.from(User.sql_source).update({"name" => "Joe"}).where(name: "John", age: Time.utc()).order(age: :asc)
-
-pp q
-
-pp Change::SQL::PostgresQuery.select(q)
-pp Change::SQL::PostgresQuery.insert(q)
-pp Change::SQL::PostgresQuery.update(q)
-pp Change::SQL::PostgresQuery.delete(q)

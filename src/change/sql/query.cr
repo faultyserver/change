@@ -45,6 +45,8 @@ module Change
       property wheres = [] of WhereExpr
       property updates = [] of UpdateExpr
       property orders = [] of OrderExpr
+      property! limit : Int32?
+      property! offset : Int32?
 
       def initialize
       end
@@ -109,6 +111,49 @@ module Change
       def order(**orders) : self
         order(orders)
       end
+
+      def limit(number) : self
+        self.limit = number
+        self
+      end
+
+      def offset(number) : self
+        self.offset = number
+        self
+      end
+
+      # The `only_` methods are clones of all the other methods, but clear out
+      # any other existing entries in that expression list beforehand.
+      #
+      # Using these methods can guarantee that values are controlled and not
+      # composed with any previous values.
+      def only_select(columns : Array) : self
+        self.selects.clear
+        self.select(columns)
+      end
+
+      def only_from(source : String) : self
+        self.froms.clear
+        self.from(source)
+      end
+
+      def only_where(conditions) : self
+        self.wheres.clear
+        self.where(conditions)
+      end
+
+      def only_update(updates) : self
+        self.updates.clear
+        self.update(updates)
+      end
+
+      def only_order(orders) : self
+        self.orders.clear
+        self.order(orders)
+      end
+
+      # LIMIT and OFFSET do not have `only_` methods, since they can only
+      # contain a single value to start with.
     end
   end
 end
