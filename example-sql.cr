@@ -1,5 +1,6 @@
 require "./src/change"
 require "./src/change/sql/postgres_repo"
+require "./src/change/sql/query"
 require "pg"
 
 struct User
@@ -36,3 +37,14 @@ pp Repo.all(User)
 
 # changeset = User.changeset(User.new, {name: "John", age: 23})
 # puts Repo.insert(conn)
+
+Query = Change::SQL::Query
+
+q = Query.new.from(User.sql_source).update({"name" => "Joe"}).where(name: "John", age: Time.utc()).order(age: :asc)
+
+pp q
+
+pp Change::SQL::PostgresQuery.select(q)
+pp Change::SQL::PostgresQuery.insert(q)
+pp Change::SQL::PostgresQuery.update(q)
+pp Change::SQL::PostgresQuery.delete(q)
