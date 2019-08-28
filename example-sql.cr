@@ -1,7 +1,6 @@
-require "./src/change"
-require "./src/change/sql/postgres_repo"
-require "./src/change/sql/query"
 require "pg"
+require "./src/change"
+require "./src/change/sql"
 
 struct User
   include Change
@@ -31,7 +30,7 @@ struct User
 end
 
 
-Repo = Change::SQL::PostgresRepo.new("db_url")
+Repo = Change::SQL::Repo.new(PG.connect("db_url"))
 Query = Change::SQL::Query
 
 pp Repo.all(User)

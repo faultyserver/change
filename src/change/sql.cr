@@ -1,3 +1,6 @@
+require "./sql/repo"
+require "./sql/query"
+
 module Change
   # This is an incredibly basic module for SQL generation. To start, I just
   # need a way of querying, inserting, updating, and deleting. No corner cases,
