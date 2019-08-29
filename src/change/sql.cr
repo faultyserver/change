@@ -18,5 +18,14 @@ module Change
     macro primary_key(name)
       class_getter primary_key = "{{name.id}}"
     end
+
+
+    macro gen_db_mapping
+      \{% begin %}
+        DB.mapping({
+          \{{*FIELDS.map{ |f| "#{f[:name]}: #{f[:type]}?".id } }}
+        })
+      \{% end %}
+    end
   end
 end

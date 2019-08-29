@@ -27,13 +27,14 @@ module Change
       # or the first result of the query if no query is given.
       #
       # If multiple records are returned by the query, the first is selected.
-      def one(queryable : T.class, query : Query = Query.new) : T forall T
+      # If no record matches, returns nil.
+      def one(queryable : T.class, query : Query = Query.new) : T? forall T
         query = query
           .only_from(T.sql_source)
           .limit(1)
 
         sql, binds = PostgresQuery.select(query)
-        conn.query_one(sql, binds, as: T)
+        conn.query_one?(sql, binds, as: T)
       end
 
       # Get the record of `queryable` whose primary key matches the given id
@@ -48,7 +49,7 @@ module Change
 
       # Attempt to save a record of `T` to the repository. The insertion is
       # only attempted if the changeset is currently valid.
-      def insert(changeset : Changeset(T, U)) : T | Changeset(T, U) forall T, U
+      def insert(changeset : Changeset(T, U)) : Changeset(T, U) forall T, U
         return changeset unless (changeset.valid?)
 
         fields = {} of String => U?
@@ -62,14 +63,15 @@ module Change
           .update(fields)
 
         sql, binds = PostgresQuery.insert(query)
-        conn.query_one(sql, binds, as: T)
+        changeset.instance = conn.query_one(sql, binds, as: T)
+        changeset
       end
 
 
       # Attempt to update a record of `T` in the repository. The update is only
       # attempted if the changeset is currently valid, and the instance of the
       # changeset has a primary key value set.
-      def update(changeset : Changeset(T, U)) forall T, U
+      def update(changeset : Changeset(T, U)) : Changeset(T, U) forall T, U
         return changeset unless (changeset.valid?)
 
         fields = {} of String => U?
@@ -85,6 +87,9 @@ module Change
 
         sql, binds = PostgresQuery.update(query)
         conn.exec(sql, binds)
+
+        changeset.apply_changes
+        changeset
       end
 
 
