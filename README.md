@@ -71,3 +71,10 @@ user #=> #<User @name=nil, @age=nil, @bio=nil>
 user = changeset.apply_changes
 user #=> #<User @name="Jon, @age=23, @bio=nil>
 ```
+
+
+## SQL querying
+
+In addition to changesets, this library also includes an optional SQL querying interface. This lives in `src/change/sql` and must be included separately from the changeset module. `Change::SQL` is built on top of Changesets, so using them is required to be able to use this. Part of this is due to Crystal's current lack of support for copying instance vars effectively at compile time, but also to provide a cleaner, more powerful interface with validations, constraints, and more.
+
+See `example-sql.cr` for an example of what the SQL interface currently looks like.

@@ -8,9 +8,12 @@ crystal: 0.30.1
 
 license: MIT
 
-development_dependencies:
-  # Used to simplify instance initialization in tests
+dependencies:
+  # Ideally, this will get integrated to not be an explicit depdency.
   auto_initialize:
     github: kostya/auto_initialize
+
+
+development_dependencies:
   pg:
     github: will/crystal-pg

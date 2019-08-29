@@ -30,7 +30,7 @@ struct User
 end
 
 
-Repo = Change::SQL::Repo.new(PG.connect("db_url"))
+Repo = Change::SQL::Repo.new(PG.connect("postgres://postgres@localhost/change_travis_ci_test"))
 Query = Change::SQL::Query
 
 pp Repo.all(User)

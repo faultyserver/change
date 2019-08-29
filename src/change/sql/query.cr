@@ -153,7 +153,17 @@ module Change
       end
 
       # LIMIT and OFFSET do not have `only_` methods, since they can only
-      # contain a single value to start with.
+      # contain a single value to start with. Instead, they have `without`
+      # methods to remove any existing value
+      def without_limit() : self
+        self.limit = nil
+        self
+      end
+
+      def without_offset() : self
+        self.offset = nil
+        self
+      end
     end
   end
 end

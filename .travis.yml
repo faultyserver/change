@@ -1,1 +1,7 @@
 language: crystal
+services:
+  - postgresql
+
+before_script:
+  - psql -c 'create database change_travis_ci_test;' -U postgres
+  - psql -f ./spec/sql/db_setup.sql change_travis_ci_test -U postgres
